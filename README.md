@@ -1,4 +1,4 @@
-# DiffusionRecapGFN
+# GFN-FlowMatching
 
 ## Introduction
 
@@ -43,8 +43,8 @@ In the context of diffusion models, GFNs modify the backward process to introduc
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/DiffusionRecapGFN.git
-   cd DiffusionRecapGFN
+   git clone https://github.com/vincehass/GFN-FlowMatching.git
+   cd GFN-FlowMatching
    ```
 2. Create and activate a virtual environment:
    ```bash
@@ -118,7 +118,7 @@ The guided sampling process follows these steps:
 ## Conclusion
 This repository presents a **GFN-enhanced diffusion model** for energy-based generative modeling. By integrating energy functions, trajectory balance, and flow conservation, this framework enables controlled, high-quality generation with applications in structured design, molecular synthesis, and image generation.
 
-For more details, refer to **DiffusionRecapGFN.pdf** included in this repository.
+For more details, refer to **GFN-FlowMatching.pdf** included in this repository.
 
 ---
 
@@ -127,7 +127,7 @@ If you use this work, please cite:
 ```
 @article{Hassen2024,
   author    = {Nadhir Hassen},
-  title     = {Mathematical Formulation of Generative Flow Networks for Diffusion Models},
+  title     = {Foundations of Generative Flow Networks for Diffusion Models},
   year      = {2024},
 }
 ```
