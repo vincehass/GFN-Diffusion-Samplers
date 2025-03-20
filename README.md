@@ -18,7 +18,7 @@ Implementation of Improved Off-Policy Training of Diffusion Samplers with Genera
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/gfn-diffusion-samplers
+git clone https://github.com/vincehass/gfn-diffusion-samplers
 cd gfn-diffusion-samplers
 pip install -r requirements.txt
 ```
