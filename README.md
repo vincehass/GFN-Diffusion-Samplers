@@ -181,7 +181,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-For questions or collaborations, please contact [Your Name] - your.email@institution.edu
+For questions or collaborations, please open an issue!
 
 ## Acknowledgements
 
