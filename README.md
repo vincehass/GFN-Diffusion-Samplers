@@ -1,4 +1,69 @@
-# GFN-FlowMatching
+# GFN-Diffusion Samplers
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+
+Implementation of Improved Off-Policy Training of Diffusion Samplers with Generative Flow Networks (GFNs), supporting both conditional and unconditional sampling paradigms.
+
+![Manywell Samples](assets/manywell_samples.png)
+
+## Key Features
+
+- 🌀 Integration of GFN trajectory balance with diffusion models
+- ⚡ Efficient off-policy training with replay buffers
+- 🔀 Support for both conditional and unconditional sampling
+- 📈 Multiple energy functions and exploration strategies
+- 🧪 Reproducible experiments on 25GMM, Manywell, and VAE tasks
+
+## Installation
+
+```bash
+git clone https://github.com/yourusername/gfn-diffusion-samplers
+cd gfn-diffusion-samplers
+pip install -r requirements.txt
+```
+
+## Quick Start
+
+### Unconditional Sampling (25GMM)
+```python
+from src.models import GFNDiffusion
+from src.sampling import unconditional
+
+# Initialize model with energy function
+model = GFNDiffusion(energy_fn=unconditional.gmm25_energy)
+
+# Sample from trained model
+samples = model.sample(batch_size=256, steps=1000)
+```
+
+### Conditional Sampling (VAE)
+```python
+from src.sampling.conditional import vae_energy
+
+# Initialize with VAE components
+energy_fn = lambda z: vae_energy(z, x, decoder, prior)
+conditional_model = GFNDiffusion(energy_fn=energy_fn)
+
+# Sample latent vectors conditioned on input x
+latent_samples = conditional_model.sample(condition=x)
+```
+
+## Configuration
+
+Experiment configurations are managed through YAML files:
+
+```yaml
+# experiments/configs/manywell.yaml
+energy_type: manywell
+diffusion_steps: 1000
+batch_size: 256
+gfn:
+  use_trajectory_balance: true
+  exploration: local_search
+  replay_buffer_size: 100000
+```
+
 
 ## Introduction
 
@@ -39,22 +104,6 @@ GFNs provide a framework for learning probability distributions over structured 
 
 In the context of diffusion models, GFNs modify the backward process to introduce an **energy-based reward function** that influences sample selection.
 
-## Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/vincehass/GFN-FlowMatching.git
-   cd GFN-FlowMatching
-   ```
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
 
 ## Conditional and Unconditional Sampling
 
@@ -115,20 +164,38 @@ The guided sampling process follows these steps:
 - **Adaptive Guidance Strength:** Modulating guidance over timesteps.
 - **Classifier-Free Guidance:** Using unconditional models for flexibility.
 
-## Conclusion
-This repository presents a **GFN-enhanced diffusion model** for energy-based generative modeling. By integrating energy functions, trajectory balance, and flow conservation, this framework enables controlled, high-quality generation with applications in structured design, molecular synthesis, and image generation.
 
-For more details, refer to **GFN-FlowMatching.pdf** included in this repository.
+## Key Differences: Conditional vs Unconditional
 
----
+| Feature | Unconditional | Conditional |
+|---------|---------------|-------------|
+| Energy Function | E(x) | E(z; x) |
+| Target Distribution | p(x) | p(z\|x) |
+| Partition Function | Global Z | Per-instance Z(x) |
+| Training Objective | Standard TB | Conditional TB |
+
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## Contact
+
+For questions or collaborations, please contact [Your Name] - your.email@institution.edu
+
+## Acknowledgements
+
+- Original paper authors: Marcin Sendera et al.
+- Mila Institute for foundational research
+- Compute resources provided by [Compute Canada/AIML]
 
 ## Citation
 If you use this work, please cite:
-```
+
 @article{Hassen2024,
   author    = {Nadhir Hassen},
   title     = {Foundations of Generative Flow Networks for Diffusion Models},
   year      = {2024},
 }
-```
+
 
