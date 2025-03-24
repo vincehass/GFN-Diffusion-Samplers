@@ -1,3 +1,7 @@
+<think>
+I'll update the README.md file to include documentation about the SLURM script (run_gfn.sh) for running jobs on a cluster. I'll add a new section specifically about using SLURM for training.
+</think>
+
 # GFN-Diffusion Samplers
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -35,6 +39,37 @@ pip install torch==1.13.1+cu117 --extra-index-url https://download.pytorch.org/w
 # OR CUDA 12.1
 pip install torch==2.1.0+cu121 --extra-index-url https://download.pytorch.org/whl/cu121
 ```
+
+## Bash Script with SLURM
+
+For running on clusters with SLURM job scheduler, we provide a bash script that simplifies job submission:
+
+```bash
+# Make the script executable
+chmod +x run_gfn.sh
+
+# Basic submission
+sbatch run_gfn.sh
+
+# Override parameters
+ENERGY=many_well T=50 BATCH_SIZE=512 EPOCHS=5000 sbatch run_gfn.sh
+
+# Disable local search
+LOCAL_SEARCH="" sbatch run_gfn.sh
+
+# Run without mixed precision
+USE_AMP="" sbatch run_gfn.sh
+```
+
+The script includes:
+
+- GPU and CPU resource allocation
+- Output logging to dedicated directory
+- Environment setup for Python and dependencies
+- Customizable parameters through environment variables
+- Performance optimizations for cluster environments
+
+For detailed scheduling options, see the SLURM documentation or check the script header comments.
 
 ## Quick Start
 
