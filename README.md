@@ -1,13 +1,9 @@
-<think>
-I'll update the README.md file to include documentation about the SLURM script (run_gfn.sh) for running jobs on a cluster. I'll add a new section specifically about using SLURM for training.
-</think>
-
 # GFN-Diffusion Samplers
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-Implementation of Improved Off-Policy Training of Diffusion Samplers with Generative Flow Networks (GFNs), supporting both conditional and unconditional sampling paradigms.
+Implementation of Diffusion Samplers with Generative Flow Networks (GFNs), supporting both conditional and unconditional sampling paradigms.
 
 ![Manywell Samples](assets/manywell_samples.png)
 
@@ -257,7 +253,7 @@ For questions or collaborations, please open an issue!
 
 ## Acknowledgements
 
-- Original paper authors: Marcin Sendera et al.
+- Inspired from paper : Improved Off-Policy Training of GFN
 - Mila Institute for foundational research
 - Compute resources provided by [Compute Canada/AIML]
 
