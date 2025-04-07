@@ -172,3 +172,27 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# WandB
+wandb/
+*/wandb/
+.wandb/
+*.wandb
+
+# Model training logs and checkpoints
+checkpoints/
+*/checkpoints/
+*.ckpt
+*.pt
+*.pth
+*.pkl
+*.h5
+*.hdf5
+logs/
+*/logs/
+runs/
+*/runs/
+outputs/
+*/outputs/
+results/
+*/results/
