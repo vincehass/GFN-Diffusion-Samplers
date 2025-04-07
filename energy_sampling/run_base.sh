@@ -1,1 +1,0 @@
-python run_gfn.py --energy many_well --use_wandb

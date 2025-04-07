@@ -1,268 +1,221 @@
-# GFN-Diffusion Samplers
+# GFlowNet-guided Diffusion for Energy-Based Sampling
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+This repository contains an implementation of energy-based sampling using GFlowNet-guided diffusion models. The repository demonstrates how GFlowNet training can guide a diffusion model toward sampling from low-energy regions of complex energy landscapes.
 
-Implementation of Diffusion Samplers with Generative Flow Networks (GFNs), supporting both conditional and unconditional sampling paradigms.
+## Overview
 
-![Manywell Samples](assets/manywell_samples.png)
+The framework combines diffusion models with GFlowNet training to create a guided sampling process that:
 
-## Key Features
+1. Learns to sample from complex multimodal energy landscapes
+2. Balances exploration and exploitation of low-energy regions
+3. Can be configured with different guidance scales to control the strength of energy guidance
 
-- 🌀 Integration of GFN trajectory balance with diffusion models
-- ⚡ Efficient off-policy training with replay buffers
-- 🔀 Support for both conditional and unconditional sampling
-- 📈 Multiple energy functions and exploration strategies
-- 🧪 Reproducible experiments on 25GMM, Manywell, and VAE tasks
+## Implemented Energy Functions
+
+The repository includes several energy functions for experimentation:
+
+1. **Simple Gaussian Mixture Model (GMM)**
+
+   - Basic 2D Gaussian mixture with 4 modes
+   - Implemented in `gmm_energy` function
+   - Good for basic validation of the method
+
+2. **Ring Energy**
+
+   - Creates a ring-shaped low-energy region
+   - Implemented in `ring_energy` function
+   - Tests the model's ability to sample from non-Gaussian distributions
+
+3. **Diagonal Energy**
+
+   - Creates diagonal valleys of low energy
+   - Implemented in `diagonal_energy` function
+   - Tests directional bias in sampling
+
+4. **Complex Mixture Energy** (Advanced)
+   - Combines multiple patterns: 5x5 GMM grid, ring overlay, and diagonal valley
+   - Implemented in `complex_mixture_energy` function
+   - Most challenging landscape for testing sampling capabilities
+   - Created to test the model's ability to handle highly multimodal and complex energy landscapes
 
 ## Installation
 
-```bash
-# Clone the repository
-git clone https://github.com/vincehass/gfn-diffusion-samplers
-cd gfn-diffusion-samplers
+- Create conda environment:
 
-# Create a virtual environment (optional but recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+```sh
+conda create -n gfn-diff python=3.10
+conda activate gfn-diff
+```
 
-# Install dependencies
+- Install dependencies for bitseq and hypergrid experiments:
+
+```sh
 pip install -r requirements.txt
-
-# For optimal GPU performance with specific CUDA versions:
-# CUDA 11.7
-pip install torch==1.13.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117
-# OR CUDA 12.1
-pip install torch==2.1.0+cu121 --extra-index-url https://download.pytorch.org/whl/cu121
 ```
 
-## Bash Script with SLURM
+- Install dependencies for molecular experiments:
 
-For running on clusters with SLURM job scheduler, we provide a bash script that simplifies job submission:
+```sh
+pip install -e . --find-links https://data.pyg.org/whl/torch-2.1.2+cu121.html
+```
+
+## Experiments and Ablation Studies
+
+We conducted several experiments to evaluate the GFlowNet-guided diffusion approach:
+
+### Advanced Experiment: Complex Mixture Energy with Different Guidance Scales
+
+We tested the complex mixture energy function with different guidance scales to understand how strongly the GFlowNet guides the diffusion process:
+
+1. **Small Guidance** (guidance_scale=1.0)
+
+   - Less aggressive guidance toward low-energy regions
+   - Higher diversity in samples
+   - Output in `results/complex_mixture_small`
+   - WandB run: `complex_mixture_small_guidance`
+
+2. **Medium Guidance** (guidance_scale=2.5)
+
+   - Balanced approach between exploration and exploitation
+   - Moderate concentration on low-energy regions
+   - Output in `results/complex_mixture_medium`
+   - WandB run: `complex_mixture_medium_guidance`
+
+3. **High Guidance** (guidance_scale=5.0)
+   - Strong bias toward low-energy regions
+   - More concentrated sampling in energy minima
+   - Output in `results/complex_mixture_high`
+   - WandB run: `complex_mixture_high_guidance`
+
+### Comprehensive Ablation Studies
+
+For a more systematic evaluation, we created an ablation study script (`run_ablation_studies.sh`) that tests various parameters with extended training (2000 epochs) and 1000 diffusion timesteps:
+
+1. **Energy Function Ablation**
+
+   - Tests all implemented energy functions (GMM, Ring, Diagonal, Complex Mixture)
+   - Compares how well the model adapts to different energy landscapes
+
+2. **Guidance Scale Ablation**
+
+   - Tests guidance scales ranging from 0.5 to 10.0
+   - Analyzes the trade-off between exploration and exploitation
+
+3. **Loss Type Ablation**
+
+   - Tests different GFlowNet loss functions (TB, TB-Avg, DB, FM)
+   - Compares training stability and final performance
+
+4. **Network Architecture Ablation**
+
+   - Tests different hidden dimensions (64, 128, 256, 512)
+   - Analyzes how model capacity affects sampling quality
+
+5. **Diffusion Schedule Ablation**
+
+   - Tests different noise schedules (Linear, Cosine, Quadratic)
+   - Analyzes the impact of the noise schedule on sample quality
+
+6. **Timestep Ablation**
+   - Tests diffusion timesteps from 100 to 5000
+   - Analyzes the trade-off between computation time and sample quality
+   - Each experiment is trained for the full 2000 epochs for thorough evaluation
+
+## Training Parameters
+
+Our ablation studies use the following training parameters:
+
+- **Training Epochs**: 2000 epochs (iterations of the GFlowNet training process)
+- **Diffusion Timesteps**: 1000 steps per sampling operation (controls noise addition/removal granularity)
+- **Batch Size**: 64 samples per training batch
+- **Evaluation Interval**: Every 100 epochs (for efficiency while still tracking progress)
+- **Full Metrics**: Computed at evaluation intervals and at the end of training
+- **Latent Dimensions**: 2D for easy visualization
+
+## Evaluation Metrics
+
+We evaluate the quality of samples using several metrics:
+
+1. **Average Reward**: Negative energy of samples (higher is better)
+2. **Diversity**: Entropy of sample distribution
+3. **Novelty**: How different samples are from the training data
+4. **Clustering**: Analysis of sample clustering at different tolerance levels
+   - At tolerance 0.1: Measures coarse-grained mode coverage
+   - At tolerance 0.01-0.0001: Measures fine-grained sample diversity
+
+### Metrics Logging and Charts
+
+The metrics in our experiments are logged at two different intervals:
+
+1. **Training Metrics** (every epoch):
+
+   - Loss/Average Reward: Logged at every epoch to show training progress
+   - These are continuously updated in the WandB charts
+
+2. **Evaluation Metrics** (every 100 epochs):
+   - Diversity: Measures how spread out the samples are
+   - Novelty: Measures how different samples are from reference points
+   - Unique Positions: Counts distinct sample clusters at different tolerance levels
+   - These metrics are more expensive to compute and are calculated periodically
+   - The final values are shown in the WandB charts and detailed in the logs
+
+When looking at the charts, note that:
+
+- Continuous metrics (loss, reward) show the complete training trajectory across all 2000 epochs
+- Advanced metrics (diversity, unique positions) are updated every 100 epochs
+- The final evaluation at the end of training includes detailed metrics at multiple tolerance levels
+
+## Visualization
+
+The framework includes visualization capabilities:
+
+- Energy landscape visualization
+- Sample overlay on energy landscapes
+- Comparative visualization between standard and GFN-guided samples
+- Saved in the `visualizations` subdirectory within each experiment's output directory
+
+## Usage
+
+To run a single experiment, use the provided training script with appropriate parameters:
 
 ```bash
-# Make the script executable
-chmod +x run_gfn.sh
-
-# Basic submission
-sbatch run_gfn.sh
-
-# Override parameters
-ENERGY=many_well T=50 BATCH_SIZE=512 EPOCHS=5000 sbatch run_gfn.sh
-
-# Disable local search
-LOCAL_SEARCH="" sbatch run_gfn.sh
-
-# Run without mixed precision
-USE_AMP="" sbatch run_gfn.sh
+python -m gfn_diffusion.energy_sampling.train --epochs 2000 \
+    --batch_size 64 \
+    --hidden_dim 128 \
+    --latent_dim 2 \
+    --num_timesteps 1000 \
+    --device cpu \
+    --schedule_type linear \
+    --energy <energy_function> \
+    --guidance_scale <guidance_scale> \
+    --loss_type tb_avg \
+    --output_dir <output_directory> \
+    --wandb \
+    --run_name <experiment_name> \
+    --eval_interval 100
 ```
 
-The script includes:
-
-- GPU and CPU resource allocation
-- Output logging to dedicated directory
-- Environment setup for Python and dependencies
-- Customizable parameters through environment variables
-- Performance optimizations for cluster environments
-
-For detailed scheduling options, see the SLURM documentation or check the script header comments.
-
-## Quick Start
-
-### Unconditional Sampling (25GMM)
-
-```python
-from src.models import GFNDiffusion
-from src.sampling import unconditional
-
-# Initialize model with energy function
-model = GFNDiffusion(energy_fn=unconditional.gmm25_energy)
-
-# Sample from trained model
-samples = model.sample(batch_size=256, steps=1000)
-```
-
-### Conditional Sampling (VAE)
-
-```python
-from src.sampling.conditional import vae_energy
-
-# Initialize with VAE components
-energy_fn = lambda z: vae_energy(z, x, decoder, prior)
-conditional_model = GFNDiffusion(energy_fn=energy_fn)
-
-# Sample latent vectors conditioned on input x
-latent_samples = conditional_model.sample(condition=x)
-```
-
-### Performance-Optimized Training
+To run comprehensive ablation studies:
 
 ```bash
-# Fast training with profiling
-python energy_sampling/train_profiled.py --energy 9gmm --local_search --T 20 --batch_size 512
-
-# For minimal dependencies (PyTorch only)
-python energy_sampling/train_pytorch_only.py --energy 9gmm --local_search --T 20
+./run_ablation_studies.sh
 ```
 
-## Configuration
+This will execute a series of experiments testing different configurations and save results to `results/ablation_studies/`.
 
-Experiment configurations are managed through YAML files:
+## Results
 
-```yaml
-# experiments/configs/manywell.yaml
-energy_type: manywell
-diffusion_steps: 1000
-batch_size: 256
-gfn:
-  use_trajectory_balance: true
-  exploration: local_search
-  replay_buffer_size: 100000
-```
+The GFlowNet-guided diffusion approach shows promising results:
 
-## Performance Optimization
+- Successfully concentrates samples in low-energy regions
+- Scales effectively with guidance strength
+- Handles complex multimodal energy landscapes
+- Maintains sample diversity even with strong guidance
 
-To improve training speed:
+Key findings from our guidance scale experiments:
 
-1. Reduce trajectory length: `--T 20` (default is 100)
-2. Enable automatic mixed precision: `--use_amp`
-3. Reduce local search iterations: `--max_iter_ls 10`
-4. Use larger batch sizes when possible: `--batch_size 512`
-5. Disable WandB for performance testing: `--disable_wandb`
+- Small guidance (1.0): 30 unique positions at tolerance 0.1, higher diversity
+- Medium guidance (2.5): 21 unique positions at tolerance 0.1, balanced diversity
+- High guidance (5.0): 17 unique positions at tolerance 0.1, concentrated on minima
 
-## Introduction
-
-This repository provides a mathematical and computational framework integrating **Generative Flow Networks (GFNs)** with **Diffusion Models** to enable energy-guided generative modeling. By leveraging **trajectory balance**, **energy-based guidance**, and **diffusion-based denoising**, this framework provides a structured approach for learning generative policies that can produce high-quality samples in an energy-efficient manner.
-
-This work aims to bridge the gap between two powerful paradigms:
-
-- **Diffusion Models:** Which learn to generate samples by gradually denoising random noise.
-- **Generative Flow Networks (GFNs):** Which model probabilistic trajectories for generating structured objects proportionally to a reward function.
-
-This repository provides theoretical formulations, algorithmic implementations, and sampling strategies that combine the best of both worlds.
-
-## Background
-
-### Diffusion Models
-
-Diffusion models are a class of probabilistic generative models that learn to reverse a Markovian noise process. They consist of two key phases:
-
-1. **Forward Process (Noise Addition):**
-
-   - A data sample **x₀** is gradually transformed into pure noise **x_T** through a sequence of Gaussian transitions:
-     \[
-     q(x*t | x*{t-1}) = \mathcal{N}(x*t; \sqrt{\alpha_t} x*{t-1}, \beta_t I)
-     \]
-   - This process ensures that after **T** steps, the data distribution transforms into an isotropic Gaussian **N(0, I)**.
-
-2. **Backward Process (Denoising):**
-   - A neural network **p*θ(x*{t-1} | x_t)** is trained to reverse this process and recover **x₀** from noisy samples.
-   - The model learns to predict either the noise **ϵ** or the original data point **x₀**.
-
-Diffusion models achieve high-quality sample generation but often require a large number of inference steps. **Energy-based guidance** can help steer this generation process toward desirable outcomes, which is where GFNs play a role.
-
-### Generative Flow Networks (GFNs)
-
-GFNs provide a framework for learning probability distributions over structured objects by treating generation as a sequential decision-making process. Key principles include:
-
-- **Trajectory Balance:** Ensuring consistency between forward (generation) and backward (denoising) probabilities.
-- **Energy-Based Guidance:** Using reward functions to bias sampling towards desirable samples.
-- **Flow Conservation:** Enforcing conservation of probability mass across transitions.
-
-In the context of diffusion models, GFNs modify the backward process to introduce an **energy-based reward function** that influences sample selection.
-
-## Conditional and Unconditional Sampling
-
-### Unconditional Sampling
-
-In unconditional sampling, the model generates samples purely based on the data distribution learned during training. The backward process follows standard noise prediction:
-
-\[
-\tilde{ϵ}*θ(x_t, t) = ϵ*θ(x_t, t)
-\]
-
-If energy-based guidance is applied, the predicted noise is modified:
-\[
-\tilde{ϵ}*θ(x_t, t) = ϵ*θ(x_t, t) - λ ∇_x E(x_t)
-\]
-
-This biases the sample generation towards **low-energy (desirable) states** while maintaining the underlying learned distribution.
-
-### Conditional Sampling
-
-In conditional sampling, an external signal **c** (such as a class label) is used to guide the generation. This is done using **classifier-free guidance**, where:
-
-1. Two noise predictions are obtained:
-   - **Conditional Prediction:** ϵ_θ(x_t, t, c)
-   - **Unconditional Prediction:** ϵ_θ(x_t, t)
-2. The two predictions are merged using:
-   \[
-   \tilde{ϵ}*θ(x_t, t) = ϵ*θ(x*t, t, c) + λ(ϵ*θ(x*t, t, c) - ϵ*θ(x_t, t))
-   \]
-
-This allows the model to generate samples that satisfy the conditional constraints while leveraging the robustness of the unconditional model.
-
-## Training
-
-The training objective integrates both the diffusion model loss and the GFN trajectory balance loss:
-
-\[
-L*{total} = L*{simple} + \lambda*{GFN} L*{GFN}
-\]
-
-where:
-
-- **L_simple**: Standard noise prediction loss.
-- **L_GFN**: GFN-based trajectory balance loss.
-- **λ_GFN**: Controls the trade-off between denoising accuracy and energy-based guidance.
-
-## Sampling Algorithm
-
-The guided sampling process follows these steps:
-
-1. **Initialize** with pure noise **x_T ~ N(0, I)**.
-2. For **t = T, T-1, ..., 1**:
-   - Predict noise: **ϵ_θ(x_t, t)**
-   - If using energy guidance, compute **∇ₓE(x_t)** and modify **ϵ**.
-   - Compute **μ_θ(x_t, t)** based on the modified noise prediction.
-   - Sample **x\_{t-1}** using the reverse process distribution.
-3. **Output** final sample **x₀**.
-
-## Extensions
-
-- **Multi-Objective Energy Functions:** Combining multiple reward criteria.
-- **Adaptive Guidance Strength:** Modulating guidance over timesteps.
-- **Classifier-Free Guidance:** Using unconditional models for flexibility.
-
-## Key Differences: Conditional vs Unconditional
-
-| Feature             | Unconditional | Conditional       |
-| ------------------- | ------------- | ----------------- |
-| Energy Function     | E(x)          | E(z; x)           |
-| Target Distribution | p(x)          | p(z\|x)           |
-| Partition Function  | Global Z      | Per-instance Z(x) |
-| Training Objective  | Standard TB   | Conditional TB    |
-
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## Contact
-
-For questions or collaborations, please open an issue!
-
-## Acknowledgements
-
-- Inspired from paper : Improved Off-Policy Training of GFN
-- Mila Institute for foundational research
-- Compute resources provided by [Compute Canada/AIML]
-
-## Citation
-
-If you use this work, please cite:
-
-@article{Hassen2024,
-author = {Nadhir Hassen},
-title = {Foundations of Generative Flow Networks for Diffusion Models},
-year = {2024},
-}
+Results are logged to Weights & Biases for comprehensive tracking and visualization.

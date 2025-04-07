@@ -1,0 +1,70 @@
+{
+  "os":  "macOS-15.4-arm64-arm-64bit",
+  "python":  "CPython 3.10.16",
+  "startedAt":  "2025-04-07T14:56:52.850587Z",
+  "args":  [
+    "--epochs",
+    "2000",
+    "--batch_size",
+    "64",
+    "--hidden_dim",
+    "128",
+    "--latent_dim",
+    "2",
+    "--num_timesteps",
+    "1000",
+    "--device",
+    "cpu",
+    "--schedule_type",
+    "linear",
+    "--energy",
+    "complex_mixture",
+    "--guidance_scale",
+    "2.5",
+    "--loss_type",
+    "tb_avg",
+    "--output_dir",
+    "results/ablation_studies/energy_ablation/complex_mixture",
+    "--wandb",
+    "--run_name",
+    "ablation_energy_complex_mixture",
+    "--eval_interval",
+    "100"
+  ],
+  "program":  "-m gfn_diffusion.energy_sampling.train",
+  "git":  {
+    "remote":  "https://github.com/vincehass/GFN-Diffusion-Samplers.git",
+    "commit":  "b5a3cd477c5483b91aecb0190887075ce1e2ba9a"
+  },
+  "email":  "nadhirvincenthassen@gmail.com",
+  "root":  "/Users/nhassen/Documents/AIML/Diffusions/repos/GFN-Diffusion-Samplers",
+  "host":  "6200L-210250-M.local",
+  "executable":  "/Users/nhassen/miniforge3/envs/gfn-diff/bin/python",
+  "cpu_count":  8,
+  "cpu_count_logical":  8,
+  "disk":  {
+    "/":  {
+      "total":  "494384795648",
+      "used":  "392406601728"
+    },
+    "/System/Volumes/Data":  {
+      "total":  "494384795648",
+      "used":  "392406601728"
+    }
+  },
+  "memory":  {
+    "total":  "17179869184"
+  },
+  "cpu":  {
+    "count":  8,
+    "countLogical":  8
+  },
+  "apple":  {
+    "name":  "Apple M1 Pro",
+    "ecpuCores":  2,
+    "pcpuCores":  6,
+    "gpuCores":  14,
+    "memoryGb":  16,
+    "ramTotalBytes":  "17179869184"
+  }
+}
