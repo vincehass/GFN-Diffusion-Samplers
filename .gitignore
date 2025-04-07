@@ -196,3 +196,11 @@ outputs/
 */outputs/
 results/
 */results/
+
+# Additional exclusions
+data/
+.DS_Store
+*/.DS_Store
+
+# Test results
+gfn_diffusion/vae/test_results/
